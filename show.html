@@ -65,9 +65,6 @@ if (m = url.match(/^(https?:)?\/\/(www\.)?twitter\.com\/([^\/]+)\//)) {
 if (author_username && author_username.substr(0, 1) != "@")
 	author_username = "@" + author_username;
 
-if (author_username == "@jcs")
-	document.getElementById("sponsor").style.display = "none";
-
 if (datetime) {
 	var d = new Date(datetime * 1000);
 	formatted_date = d.toDateString();
