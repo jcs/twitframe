@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Twitframe - Embed Tweets in an iframe</title>
+	<style type="text/css">
+		body {
+			font-family: helvetica neue, arial, helvetica, sans-serif;
+			font-size: 10pt;
+			margin: 1em;
+			max-width: 760px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		h1 {
+			margin: 0;
+		}
+		a {
+			color: #0000dd;
+		}
+		code, pre {
+			background-color: #f2f2f2;
+			display: block;
+			outline: 1px solid #bbb;
+			margin: 1em;
+			padding: 1em;
+			overflow-x: auto;
+		}
+		iframe, div.iframe {
+			margin-left: 1em;
+			font-family: serif;
+			font-size: 12pt;
+		}
+		div.iframe {
+			background-color: #fafafa;
+			padding: 1em;
+			height: 250px;
+			width: 550px;
+			overflow-x: auto;
+		}
+		div.iframe, iframe.gray {
+			background-color: #fafafa;
+		}
+		tt {
+			color: green;
+		}
+		hr {
+			border: 1px solid gray;
+		}
+	</style>
+	<script src="/jquery-1.9.1.min.js"></script>
+</head>
+<body>
+
+<h1>Twitframe</h1>
+
+<p>
+Twitframe allows one to display <a
+href="https://dev.twitter.com/web/embedded-tweets">Embedded Tweets</a> on
+websites to dynamically show retweet and favorite counts, inline media/card
+data, and allow users to retweet/reply/favorite Tweets, all while isolating the
+Javascript and DOM manipulation to an embedded <tt>iframe</tt>.
+This increases security and speeds up website page loads.
+</p>
+
+<p style="color: gray; font-style: italic;">
+This is an independent service not affiliated with Twitter in any way.
+No guarantee of availability or security is made by using this service.
+</p>
+
+<h3>Use</h3>
+
+<p>
+Add an <tt>&lt;iframe&gt;</tt> to your HTML document and pass (at least) the
+full URL to the Tweet as a <a
+href="https://en.wikipedia.org/wiki/Percent-encoding">URL-encoded</a>
+parameter <tt>url</tt> to <tt>http://twiframe.com/show</tt>:
+</p>
+
+<p>
+<code>
+	&lt;iframe border=0 frameborder=0 height=250 width=550
+	<br>
+	&nbsp;src="https://twitframe.com/show?<span style="color: green;"
+	>url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20</span>"&gt;&lt;/iframe&gt;
+</code>
+</p>
+
+<p>
+This example code would produce the following (without the gray background):
+</p>
+
+<iframe border=0 frameborder=0 height=250 width=550 class="gray"
+src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
+
+<p>
+Note that a height of 250 may be too big for short tweets such as this one,
+but too small for long tweets with embedded media.  See <a
+href="#sizing">sizing</a> below to automatically size the <tt>iframe</tt> based
+on its size.
+</p>
+
+<p>
+<h3>Graceful Degredation</h3>
+</p>
+
+<p>
+If the Tweet data is known beforehand, it can be passed to Twitframe to be
+displayed before Twitter's Javascript loads.
+The following parameters may be passed:
+</p>
+
+<p>
+<ul>
+<li><tt>tweet</tt> - The full text of the Tweet</li>
+<li><tt>author_name</tt> - The full name of the Tweet's author</li>
+<li><tt>author_username</tt> - The username of the Tweet's author, including
+	the @ sign</li>
+<li><tt>datetime</tt> - The date and time of the Tweet, in ISO 8601 format or a
+	Unix timestamp</li>
+</ul>
+</p>
+
+<p>
+Each parameter should be properly URL-encoded when used as the URL for the
+iframe.  An example using PHP:
+</p>
+
+<p>
+<pre>
+&lt;?php
+
+    $tf = "https://twitframe.com/show?" . http_build_query(array(
+        "url" =&gt; "https://twitter.com/jack/status/20",
+        "tweet" =&gt; "just setting up my twttr",
+        "author_name" =&gt; "Jack Dorsey",
+        "author_username" =&gt; "jack",
+        "datetime" =&gt; "1142974214",
+    ));
+
+    echo "&lt;iframe border=0 frameborder=0 height=250 width=550 "
+        . "src=\"" . $tf . "\"&gt;&lt;/iframe&gt;";
+?&gt;
+</pre>
+</p>
+
+<p>
+If Twitter's Javascript could not be loaded, this example would produce the
+following (without the gray background):
+</p>
+
+<p>
+<iframe border=0 frameborder=0 height=250 width=550 class="gray"
+src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20&tweet=just+setting+up+my+twttr&author_name=Jack+Dorsey&author_username=jack&datetime=1142974214&force_fail=1"></iframe>
+</p>
+
+<h3>Styling</h3>
+
+<p>
+The following optional parameters may be passed to affect the style of the
+embedded Tweet.  These are passed directly through to Twitter's Javascript.
+</p>
+
+<p>
+<ul>
+<li><tt style="color: green;">align</tt> - Alignment of the embedded Tweet
+	inside the iframe - can be <tt style="color: green;">left</tt>, 
+<tt style="color: green;">center</tt>, or
+<tt style="color: green;">right</tt></li>
+
+<li><tt style="color: green;">link_color</tt> - Hex code for link color
+
+<li><tt style="color: green;">theme</tt> - <a
+href="https://dev.twitter.com/web/embedded-tweets/parameters">Theme</a> of
+Tweet display (such as <tt>dark</tt>)
+</ul>
+</p>
+
+<h3 id="sizing">Sizing</h3>
+
+<p>
+As with any iframe, its height and width within the parent document are static,
+and must be included as attributes in the <tt>&lt;iframe&gt;</tt> tag or
+applied with CSS.  Reasonable recommendations to display most Tweets (without
+embedded media) without scrolling are <tt>height=250</tt> and
+<tt>width=550</tt>.  To automatically resize the height of the iframe after it
+has loaded, some Javascript is required.
+</p>
+
+<p>
+Since a parent HTML page loading an iframe from <tt>twitframe.com</tt> has
+loaded a cross-origin resource, the parent HTML page is not permitted to
+access the iframe's DOM to find out its height.  Newer browsers implementing
+<tt><a href="https://developer.mozilla.org/en-US/docs/DOM/window.postMessage">window.postMessage</a></tt>
+can send a message to the twitframe.com iframe (which it is listening for) and
+request its height after Twitter's Javascript loads.  <tt>twitframe.com</tt>
+will send a response message with the height after it has loaded the Twitter
+content.
+</p>
+
+<p>
+Using jQuery, the following code will send a message to each
+<tt>&lt;iframe&gt;</tt> element on the page that you have named like
+"<tt>tweet_281974362784022528</tt>":
+</p>
+
+<p>
+<pre>
+$(document).ready(function() {
+    /* find all iframes with ids starting with "tweet_" */
+    $("iframe[id^='tweet_']").load(function() {
+        this.contentWindow.postMessage({ element: this.id, query: "height" },
+            "https://twitframe.com");
+    });
+});
+
+/* listen for the return message once the tweet has been loaded */
+$(window).bind("message", function(e) {
+    var oe = e.originalEvent;
+    if (oe.origin != "https://twitframe.com")
+        return;
+	
+    if (oe.data.height &amp;&amp; oe.data.element.match(/^tweet_/))
+        $("#" + oe.data.element).css("height", parseInt(oe.data.height) + "px");
+});
+</pre>
+</p>
+
+<p>
+This code resizes the two Twitframe iframes after they have loaded, increasing
+the height of the second one to display the embedded card information.
+</p>
+
+<iframe id="tweet_297462728598122498" border=0 frameborder=0
+src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjcs%2Fstatus%2F240434234404245504&tweet=I+captured+the+flag+in+the+%40Stripe+CTF+challenge+-+https%3A%2F%2Fstripe-ctf.com%2Fprogress%2Fjcs++%23stripectf&author_name=joshua+stein&author_username=jcs"
+width=550 height=250></iframe>
+
+<iframe id="tweet_281974362784022528" border=0 frameborder=0
+src="https://twitframe.com/show?url=
+https%3A%2F%2Ftwitter.com%2Fsuperblock%2Fstatus%2F343800952840675328"
+width=550 height=250></iframe>
+
+<script>
+$(document).ready(function() {
+	$("iframe[id^='tweet_']").load(function() {
+		this.contentWindow.postMessage({ element: this.id,
+			query: "height" }, "https://twitframe.com");
+	});
+});
+
+/* listen for the return message once the tweet has been loaded */
+$(window).bind("message", function(e) {
+	var oe = e.originalEvent;
+
+	if (oe.origin != "https://twitframe.com")
+		return;
+
+	if (oe.data.height && oe.data.element.match(/^tweet_/))
+		$("#" + oe.data.element).css("height", parseInt(oe.data.height) + "px");
+});
+</script>
+
+<hr>
+
+<p>
+Copyright &copy; 2013-2019, <a href="https://github.com/jcs/twitframe/">joshua
+stein</a>.
+</p>
+</body>
+</html>

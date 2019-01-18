@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<style type="text/css">
+	#author_name {
+		font-weight: bold;
+	}
+	body {
+		padding-top: 1px;
+	}
+	#brand {
+		background-color: #fbfbfb;
+		color: #bbb;
+		font-family: helvetica neue, arial, sans-serif;
+		font-size: 8pt;
+		left: 0px;
+		padding-left: 0.5em;
+		padding-right: 0.5em;
+		position: absolute;
+		top: 0px;
+	}
+	#brand a {
+		color: #aaa;
+		text-decoration: none;
+	}
+</style>
+</head>
+<body>
+	<span id="brand">
+	<a href="https://twitframe.com/?ref=t" target="_blank">Twitframe</a>
+	</span>
+	<blockquote class="twitter-tweet" id="t">
+		<span id="author_name"></span>
+		<span id="author_username"></span>
+		<p>
+		<span id="tweet"></span>
+		</p>
+		<a id="date"></a>
+	</blockquote>
+</body>
+<script>
+
+var params = {};
+location.search.substr(1).split("&").forEach(function(part) {
+	var item = part.split("=");
+	params[item[0]] = decodeURIComponent(item[1]).replace(/\+/g, " ");
+});
+
+var url = params["url"] || "";
+var datetime = (params["datetime"] || 0);
+var tweet = (params["tweet"] ? params["tweet"] : "Loading tweet...");
+var author_name = (params["author_name"] ? params["author_name"] : "");
+var author_username = (params["author_username"] ? params["author_username"] : "");
+var align = params["align"];
+var link_color = params["link_color"];
+var theme = params["theme"];
+var formatted_date = "Unknown date";
+
+var m;
+if (m = url.match(/^(https?:)?\/\/(www\.)?twitter\.com\/([^\/]+)\//)) {
+	if (!author_username)
+		author_username = m[3];
+}
+
+if (author_username && author_username.substr(0, 1) != "@")
+	author_username = "@" + author_username;
+
+if (author_username == "@jcs")
+	document.getElementById("sponsor").style.display = "none";
+
+if (datetime) {
+	var d = new Date(datetime * 1000);
+	formatted_date = d.toDateString();
+}
+
+var t = document.getElementById("t");
+if (align)
+	t.align = align;
+if (link_color)
+	t.data["link-color"] = link_color;
+if (theme)
+	t.data["theme"] = theme;
+
+var h = "";
+if (author_name)
+	document.getElementById("author_name").innerText = author_name;
+if (author_username)
+	document.getElementById("author_username").innerText = author_username;
+
+document.getElementById("tweet").innerText = tweet;
+
+document.getElementById("date").href = url;
+document.getElementById("date").innerText = formatted_date;
+
+if (!params["force_fail"]) {
+	var s = document.createElement("script");
+	s.src = "https://platform.twitter.com/widgets.js";
+	document.body.appendChild(s);
+}
+
+var caller, _timer, loaded = false;
+var saveCaller = function(e) {
+    if (e.data.element) {
+        caller = e;
+        if (loaded)
+            sendResponse();
+    }
+};
+if (window.addEventListener)
+    window.addEventListener("message", saveCaller, false);
+else
+    window.attachEvent("onmessage", saveCaller);
+
+function onload() {
+    if (arguments.callee.done)
+        return;
+    arguments.callee.done = true;
+
+    if (_timer)
+        clearInterval(_timer);
+
+    loaded = true;
+    if (caller)
+        sendResponse();
+}
+
+if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", onload, false);
+else if (/WebKit/i.test(navigator.userAgent)) {
+    _timer = setInterval(function() {
+        if (/loaded|complete/.test(document.readyState))
+            onload();
+    }, 10);
+}
+else
+    window.onload = onload;
+
+function sendResponse() {
+    if (caller.data.query == "height") {
+        setTimeout(function() {
+            caller.source.postMessage({ element: caller.data.element,
+                height: document.body.scrollHeight + 20 }, caller.origin);
+        }, 500);
+    }
+};
+</script>
+</html>
