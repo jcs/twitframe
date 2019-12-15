@@ -108,37 +108,27 @@ if (window.addEventListener)
 else
     window.attachEvent("onmessage", saveCaller);
 
-function onload() {
-    if (arguments.callee.done)
-        return;
-    arguments.callee.done = true;
+var lastHeight = 0;
+var loadedTime = window.performance ? window.performance.now() : 0;
+function checkHeight() {
+	if (document.body.scrollHeight != lastHeight && caller) {
+		lastHeight = document.body.scrollHeight;
+		sendResponse();
+	}
 
-    if (_timer)
-        clearInterval(_timer);
+	/* give up after a while to save cpu */
+	if (window.performance &&
+	  (window.performance.now() - loadedTime > (10 * 1000)))
+		return;
 
-    loaded = true;
-    if (caller)
-        sendResponse();
+	window.requestAnimationFrame(checkHeight);
 }
-
-if (document.addEventListener)
-    document.addEventListener("DOMContentLoaded", onload, false);
-else if (/WebKit/i.test(navigator.userAgent)) {
-    _timer = setInterval(function() {
-        if (/loaded|complete/.test(document.readyState))
-            onload();
-    }, 10);
-}
-else
-    window.onload = onload;
+window.requestAnimationFrame(checkHeight);
 
 function sendResponse() {
-    if (caller.data.query == "height") {
-        setTimeout(function() {
-            caller.source.postMessage({ element: caller.data.element,
-                height: document.body.scrollHeight + 20 }, caller.origin);
-        }, 500);
-    }
+	if (caller.data.query == "height")
+		caller.source.postMessage({ element: caller.data.element,
+			height: document.body.scrollHeight + 20 }, caller.origin);
 };
 </script>
 </html>
