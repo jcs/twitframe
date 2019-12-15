@@ -55,6 +55,7 @@ var align = params["align"];
 var link_color = params["link_color"];
 var theme = params["theme"];
 var formatted_date = "Unknown date";
+var conversation = params["conversation"];
 
 var m;
 if (m = url.match(/^(https?:)?\/\/(www\.)?twitter\.com\/([^\/]+)\//)) {
@@ -74,9 +75,11 @@ var t = document.getElementById("t");
 if (align)
 	t.align = align;
 if (link_color)
-	t.data["link-color"] = link_color;
+	t.setAttribute("link-color", link_color);
 if (theme)
-	t.data["theme"] = theme;
+	t.setAttribute("theme", theme);
+if (conversation)
+	t.setAttribute("conversation", conversation);
 
 var h = "";
 if (author_name)
